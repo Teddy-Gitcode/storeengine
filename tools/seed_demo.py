@@ -133,15 +133,21 @@ for pm in load("payment-methods.json"):
     cfg.save()
 
 # ── Customers (fictional) ───────────────────────────────────────────────────
-FIRST = ["Wanjiru", "Otieno", "Achieng", "Kamau", "Njeri", "Kiprono", "Akinyi", "Mutua", "Chebet", "Omondi",
-         "Wambui", "Kibet", "Nyambura", "Barasa", "Atieno", "Mwangi", "Jepkosgei", "Odhiambo", "Muthoni", "Langat",
-         "Amina", "Hassan", "Faith", "Brian", "Grace", "Kevin", "Mercy", "Dennis", "Joy", "Collins"]
-LAST = ["Kariuki", "Ochieng", "Wafula", "Njoroge", "Koech", "Onyango", "Mwende", "Rotich", "Kilonzo", "Maina",
-        "Cheruiyot", "Owino", "Gitau", "Nyaga", "Kipchumba", "Mohamed", "Wekesa", "Kimani", "Ruto", "Adhiambo"]
-CITIES = [("Nairobi", 46), ("Mombasa", 12), ("Kisumu", 10), ("Nakuru", 9), ("Eldoret", 8), ("Kericho", 6),
-          ("Thika", 5), ("Nyeri", 4)]
-STREETS = ["Ngong Road", "Kenyatta Avenue", "Moi Avenue", "Oginga Odinga St", "Uhuru Highway", "Kimathi St",
-           "Waiyaki Way", "Mama Ngina St", "Tom Mboya St", "Langata Road"]
+# (country, weight, phone prefix, cities)
+COUNTRIES = [
+    ("KE", 30, "+2547", ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret"]),
+    ("US", 12, "+1415", ["New York", "Austin", "San Francisco", "Chicago"]),
+    ("GB", 10, "+4477", ["London", "Manchester", "Bristol"]),
+    ("NG", 8, "+23480", ["Lagos", "Abuja"]),
+    ("ZA", 7, "+2782", ["Cape Town", "Johannesburg", "Durban"]),
+    ("DE", 6, "+49151", ["Berlin", "Munich", "Hamburg"]),
+    ("AE", 6, "+97150", ["Dubai", "Abu Dhabi"]),
+    ("UG", 6, "+25677", ["Kampala", "Entebbe"]),
+    ("IN", 5, "+9198", ["Bengaluru", "Mumbai", "Delhi"]),
+    ("CA", 5, "+1416", ["Toronto", "Vancouver"]),
+]
+STREETS = ["Market Street", "High Street", "Park Avenue", "Station Road", "Church Street", "Main Road",
+           "Ngong Road", "Kenyatta Avenue", "Victoria Street", "King Street"]
 
 
 def pick(weighted):
@@ -149,27 +155,20 @@ def pick(weighted):
 
 
 customers = []
-used = set()
-for i in range(48):
-    while True:
-        first, last = random.choice(FIRST), random.choice(LAST)
-        if (first, last) not in used:
-            used.add((first, last))
-            break
+for i in range(1, 49):
+    country, _, prefix, cities = random.choices(COUNTRIES, weights=[c[1] for c in COUNTRIES])[0]
     joined = at(random.uniform(5, 300))
-    user = User.objects.create_user(
-        username=f"{first}.{last}".lower(), email=f"{first}.{last}@example.com".lower(),
-        password=None, first_name=first, last_name=last,
-    )
+    email = f"johndoe{i}@example.com"
+    user = User.objects.create_user(username=email, email=email, password=None,
+                                    first_name="John", last_name=f"Doe {i}")
     User.objects.filter(pk=user.pk).update(date_joined=joined)
-    phone = f"+2547{random.randint(10, 99)}{random.randint(100000, 999999)}"
+    phone = f"{prefix}{random.randint(1000000, 9999999)}"
     prof = CustomerProfile.objects.create(user=user, phone=phone, marketing_opt_in=random.random() < 0.6,
                                           email_verified=True)
     CustomerProfile.objects.filter(pk=prof.pk).update(created_at=joined)
-    city = pick(CITIES)
-    addr = Address.objects.create(customer=prof, type="shipping", full_name=f"{first} {last}", phone=phone,
-                                  line1=f"{random.randint(1, 240)} {random.choice(STREETS)}", city=city,
-                                  country_code="KE", is_default=True)
+    addr = Address.objects.create(customer=prof, type="shipping", full_name=f"John Doe {i}", phone=phone,
+                                  line1=f"{random.randint(1, 240)} {random.choice(STREETS)}",
+                                  city=random.choice(cities), country_code=country, is_default=True)
     customers.append((prof, addr, joined))
 
 # ── Orders ──────────────────────────────────────────────────────────────────
@@ -189,7 +188,9 @@ SHAPES = [
     (P.REFUNDED, F.RETURNED, "prepaid", False, 2),
     (P.PARTIALLY_REFUNDED, F.DELIVERED, "prepaid", False, 2),
 ]
-PROVIDERS = [("mobile_money", 60), ("paystack", 28), ("paypal", 12)]
+PROVIDERS_KE = [("mobile_money", 65), ("paystack", 35)]
+PROVIDERS_INTL = [("paypal", 60), ("paystack", 40)]
+FX = Decimal(str(snap.get("secondary_currency_rate") or "0.0077035668"))
 RIDERS = [("Peter Kamau", "KMFG 214A"), ("Samuel Otieno", "KMDX 902L"), ("Daniel Kiptoo", "KMEB 388C")]
 active = [p for p in products if p.status == "active"]
 orders = []
@@ -203,9 +204,18 @@ for i in range(160):
         ful = F.DELIVERED
         pay = P.PAID
     prof, addr, joined = random.choice(customers)
+    home = addr.country_code == "KE"
+    if not home and method == "cod":
+        method = "prepaid"
+        if pay == P.DUE_ON_DELIVERY:
+            pay = P.PAID
+    # Everyone pays in KES: the admin's order list formats every amount in the
+    # store currency, so USD orders would be mislabelled there.
+    rate = Decimal("1")
+    currency = "KES"
     order = Order.objects.create(
         number=f"SO-{placed:%y%m}{10000 + i}", customer=prof, email=prof.user.email, phone=prof.phone,
-        payment_status=pay, fulfillment_status=ful, payment_method=method, currency="KES",
+        payment_status=pay, fulfillment_status=ful, payment_method=method, currency=currency, fx_rate=rate,
         placed_at=placed, shipping_address=addr, billing_address=addr,
         cancelled_at=placed + timedelta(hours=random.randint(1, 30)) if cancelled else None,
         metadata={"channel": random.choice(["web", "web", "web", "mobile", "mobile"])},
@@ -213,20 +223,21 @@ for i in range(160):
     subtotal = Decimal("0")
     for prod in random.sample(active, k=random.choices([1, 2, 3, 4], weights=[48, 32, 14, 6])[0]):
         qty = 1 if prod.price > 20000 else random.choices([1, 2, 3], weights=[70, 22, 8])[0]
-        line = prod.price * qty
+        unit = (prod.price * rate).quantize(Decimal("0.01"))
+        line = unit * qty
         subtotal += line
         OrderItem.objects.create(order=order, product_id=prod.id, sku=prod.sku, name=prod.name,
-                                 quantity=qty, unit_price=prod.price, line_total=line)
-    shipping = Decimal("300.00")
-    discount = (subtotal * Decimal("0.10")).quantize(Decimal("1")) if random.random() < 0.15 else Decimal("0")
+                                 quantity=qty, unit_price=unit, line_total=line)
+    shipping = Decimal("300.00") if home else Decimal("3200.00")
+    discount = (subtotal * Decimal("0.10")).quantize(Decimal("0.01")) if random.random() < 0.15 else Decimal("0")
     order.subtotal, order.shipping_total, order.discount_total = subtotal, shipping, discount
     order.grand_total = subtotal + shipping - discount
     if ful in (F.PACKED, F.SHIPPED, F.DELIVERED, F.RETURNED):
-        order.packed_at = placed + timedelta(hours=random.randint(3, 20))
+        order.packed_at = min(placed + timedelta(hours=random.randint(3, 20)), now - timedelta(hours=2))
         order.package_weight_grams = random.randint(400, 9000)
         order.package_length_cm, order.package_width_cm, order.package_height_cm = 40, 30, random.randint(8, 30)
     if ful in (F.SHIPPED, F.DELIVERED, F.RETURNED):
-        order.dispatched_at = order.packed_at + timedelta(hours=random.randint(2, 18))
+        order.dispatched_at = min(order.packed_at + timedelta(hours=random.randint(2, 18)), now - timedelta(hours=1))
     order.status = order.compute_display_status()
     order.save()
     Order.objects.filter(pk=order.pk).update(created_at=placed)
@@ -252,17 +263,17 @@ for i in range(160):
                                              actor="system" if st in ("pending_payment", "paid") else "staff")
         OrderStatusEvent.objects.filter(pk=ev.pk).update(created_at=t)
         prev = st
-        t = t + timedelta(hours=random.randint(1, 26))
+        t = min(t + timedelta(hours=random.randint(1, 26)), now - timedelta(minutes=random.randint(10, 90)))
 
     if pay in (P.PAID, P.REFUNDED, P.PARTIALLY_REFUNDED, P.FAILED) or (pay == P.PENDING and not cancelled):
-        provider = pick(PROVIDERS)
+        provider = pick(PROVIDERS_KE if home else PROVIDERS_INTL)
         status = {P.PAID: "confirmed", P.REFUNDED: "refunded", P.PARTIALLY_REFUNDED: "confirmed",
                   P.FAILED: "failed", P.PENDING: "pending"}[pay]
         pm = Payment.objects.create(
-            order=order, provider=provider, status=status, amount=order.grand_total, currency="KES",
+            order=order, provider=provider, status=status, amount=order.grand_total, currency=currency,
             provider_reference=f"{'QK' if provider == 'mobile_money' else 'T'}{random.randint(10**8, 10**9 - 1)}",
             idempotency_key=f"demo-{order.number}",
-            failure_reason="The customer cancelled the M-Pesa prompt." if status == "failed" else "",
+            failure_reason=("The customer cancelled the M-Pesa prompt." if provider == "mobile_money" else "Card declined by the issuer.") if status == "failed" else "",
             confirmed_at=placed + timedelta(minutes=random.randint(1, 20)) if status in ("confirmed", "refunded") else None,
         )
         Payment.objects.filter(pk=pm.pk).update(created_at=placed)
@@ -270,13 +281,14 @@ for i in range(160):
     if order.dispatched_at:
         rider, plate = random.choice(RIDERS)
         nairobi = addr.city == "Nairobi"
+        dhl_service = "DHL Express Domestic" if home else "DHL Express Worldwide"
         sh = Shipment.objects.create(
             order=order, provider="courier" if nairobi else "dhl",
             status={F.SHIPPED: "in_transit", F.DELIVERED: "delivered", F.RETURNED: "returned"}[ful],
             tracking_number=f"SE{random.randint(10**7, 10**8 - 1)}" if not nairobi else "",
-            service_name="Same-day rider" if nairobi else "DHL Express Domestic",
-            cost=Decimal("300.00"), currency="KES",
-            estimated_delivery_at=order.dispatched_at + timedelta(days=1 if nairobi else 3),
+            service_name="Same-day rider" if nairobi else dhl_service,
+            cost=shipping, currency=currency,
+            estimated_delivery_at=order.dispatched_at + timedelta(days=1 if nairobi else 3 if home else 6),
             rider_name=rider if nairobi else "", vehicle="Motorbike" if nairobi else "",
             vehicle_plate=plate if nairobi else "",
         )
@@ -291,7 +303,7 @@ for o, st in zip(random.sample(delivered, 7), ["requested"] * 3 + ["approved"] *
     r = Refund.objects.create(
         order=o, kind=random.choice(["refund", "return"]), status=st,
         amount=o.items.first().line_total, partial=o.items.count() > 1, reason=random.choice(REASONS),
-        method="M-Pesa reversal", requested_by=o.email,
+        method="M-Pesa reversal" if o.shipping_address.country_code == "KE" else "Card refund", requested_by=o.email,
         resolved_by="demo.admin" if st != "requested" else "",
         resolution_note={"approved": "Refunded to M-Pesa.", "rejected": "Outside the 14-day window."}.get(st, ""),
         resolved_at=now - timedelta(days=random.randint(1, 10)) if st != "requested" else None,
@@ -311,7 +323,7 @@ for o in random.sample(delivered, 40):
     rating, title, body = random.choice(REVIEW_TEXT)
     prof = o.customer
     rv = Review.objects.create(product_id=item.product_id, customer=prof,
-                               display_name=f"{prof.user.first_name} {prof.user.last_name[0]}.",
+                               display_name=prof.user.email.split("@")[0],
                                rating=rating, title=title, body=body, is_verified_purchase=True,
                                is_approved=random.random() < 0.85)
     Review.objects.filter(pk=rv.pk).update(created_at=o.placed_at + timedelta(days=random.randint(3, 9)))
@@ -322,14 +334,14 @@ TICKETS = [
     ("Change delivery address", "order", "medium", "in_progress", "Can I have it delivered to my office instead?"),
     ("M-Pesa charged twice", "payment", "urgent", "open", "I was charged twice for the same order, please help."),
     ("Do you have this in blue?", "product", "low", "resolved", "Is the weekender bag available in navy?"),
-    ("Invoice for my company", "order", "low", "closed", "Please send an invoice with our KRA PIN."),
+    ("Invoice for my company", "order", "low", "closed", "Please send an invoice with our company VAT number."),
     ("Return request", "returns", "medium", "open", "The jeans are too small, how do I return them?"),
 ]
 for i, (subj, cat, prio, st, msg) in enumerate(TICKETS):
     o = random.choice(orders)
     prof = o.customer
     tk = SupportTicket.objects.create(
-        reference=f"SUP-{4200 + i}", name=f"{prof.user.first_name} {prof.user.last_name}", email=prof.user.email,
+        reference=f"SUP-{4200 + i}", name=prof.user.email.split("@")[0], email=prof.user.email,
         subject=subj, message=msg, category=cat, order_number=o.number, status=st, priority=prio,
         customer=prof, needs_human=st == "open",
     )
@@ -351,12 +363,14 @@ for name, code, ptype, value, st in [
 
 # Abandoned carts.
 for i in range(9):
-    prof, _, _ = random.choice(customers)
+    prof, cart_addr, _ = random.choice(customers)
+    cart_rate = Decimal("1")
     picked = random.sample(active, k=random.randint(1, 3))
     AbandonedCart.objects.create(
         reference=f"CART-{7300 + i}", customer=prof, email=prof.user.email, phone=prof.phone,
-        status=random.choice(["abandoned", "abandoned", "recovered"]), currency="KES",
-        subtotal=sum((p.price for p in picked), Decimal("0")), item_count=len(picked),
+        status=random.choice(["abandoned", "abandoned", "recovered"]),
+        currency="KES" if cart_rate == 1 else "USD",
+        subtotal=sum(((p.price * cart_rate).quantize(Decimal("0.01")) for p in picked), Decimal("0")), item_count=len(picked),
         last_activity_at=at(random.uniform(0.2, 12)),
         metadata={"items": [{"product_id": p.id, "name": p.name, "quantity": 1, "price": str(p.price)} for p in picked]},
     )

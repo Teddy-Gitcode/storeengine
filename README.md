@@ -15,8 +15,9 @@ recorded responses.
 - **Products, categories, photos and store settings** come from the live
   TedStore catalogue (133 products), rebranded as StoreEngine.
 - **Customers, orders, payments, refunds, reviews and support tickets** are
-  generated. The names are fictional, the emails are `@example.com`, and no
-  real shopper data is in this repo.
+  generated. Customers are `johndoe1` to `johndoe48` (`@example.com`) in ten
+  countries. Every order is in KES, because the admin's order list formats
+  amounts in the store currency. No real shopper data is in this repo.
 - **Writes are never stored.** Saving in the admin succeeds and echoes the
   record back, but the next page load shows the original data. Any visitor
   could otherwise rewrite what the next one sees.
@@ -79,8 +80,9 @@ subdomains, change `NEXT_PUBLIC_ADMIN_URL` in `storefront/.env` and
 `tools/` holds the scripts that produced the fixtures. They need a copy of the
 e-cormmece backend running on a scratch SQLite database.
 
-1. `seed_demo.py` and `seed_extras.py` (run through `manage.py shell`) load the
-   catalogue snapshot (`DEMO_SNAPSHOT`) and generate everything else.
+1. `seed_demo.py`, `seed_extras.py` and `seed_after.py` (in that order, through
+   `manage.py shell`) load the catalogue snapshot (`DEMO_SNAPSHOT`) and
+   generate everything else.
 2. `recorder.py` is a middleware that logs every JSON response while
    `crawl.mjs` visits every page of both apps.
 3. `collect.py` turns those logs into `fixtures/*.json` (`DEMO_WORKDIR`).

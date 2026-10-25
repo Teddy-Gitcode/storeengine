@@ -25,7 +25,7 @@ type Page = { count: number; next: string | null; previous: string | null; resul
 /* When the fixtures were recorded. Every timestamp in them moves forward by
    the whole days since, so "placed yesterday" stays yesterday and the demo
    never looks abandoned. Update it when the fixtures are re-recorded. */
-const RECORDED_AT = Date.parse("2026-10-25T18:57:00Z");
+const RECORDED_AT = Date.parse("2026-10-25T19:31:00Z");
 const DAY_MS = 86_400_000;
 const ISO_DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
 
@@ -339,6 +339,13 @@ function coupon(data: Row) {
   return json({ valid: false, message: "Invalid or expired code. Try WELCOME10 or FREESHIP." });
 }
 
+/** An order the demo shopper owns, for the tracking page's hint. */
+function sampleOrder() {
+  const mine = fixture("/storefront/orders/")?.body;
+  const rows = isPage(mine) ? mine.results : Array.isArray(mine) ? (mine as Row[]) : [];
+  return String(rows[0]?.number ?? "an order number");
+}
+
 async function write(method: string, path: string, url: URL, data: Row): Promise<Response> {
   // Shopper session
   if (path === "/auth/login/" || path === "/auth/google/" || path === "/auth/email/verify/")
@@ -370,7 +377,7 @@ async function write(method: string, path: string, url: URL, data: Row): Promise
     const tracked = fixture(`/storefront/orders/${number}/`)?.body as Row | undefined;
     return tracked
       ? json({ ...tracked, shipment: (tracked.shipment as Row) ?? null })
-      : json({ detail: "No order with that number and email. Try SO-261010050 with demo@storeengine.demo." }, 404);
+      : json({ detail: `No order with that number and email. Try ${sampleOrder()} with demo@storeengine.demo.` }, 404);
   }
   if (path === "/storefront/contact/") return json({ reference: `TKT-${Math.floor(100000 + Math.random() * 899999)}`, detail: "Thanks! This is a demo, so no one will reply." }, 201);
   if (path === "/storefront/assistant/")
