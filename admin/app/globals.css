@@ -1,0 +1,1502 @@
+/* Country flag SVGs (see components/Flag.tsx) — must precede @tailwind so the
+   utility layer can still override sizing on `.fi`. */
+@import 'flag-icons/css/flag-icons.min.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── @font-face — copied verbatim from the Sellzy template (same woff2 files
+   + same Arial-metric fallback faces), so rendering is pixel-identical. ─── */
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:100 1000;font-display:swap;src:url(/assets/next/static/media/c3cb240f9c892514-s.d8e4bce2.woff2) format("woff2");unicode-range:U+100-2BA,U+2BD-2C5,U+2C7-2CC,U+2CE-2D7,U+2DD-2FF,U+304,U+308,U+329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:100 1000;font-display:swap;src:url(/assets/next/static/media/5c285b27cdda1fe8-s.p.a62025f2.woff2) format("woff2");unicode-range:U+0-FF,U+131,U+152-153,U+2BB-2BC,U+2C6,U+2DA,U+2DC,U+304,U+308,U+329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'DM Sans Fallback';src:local(Arial);ascent-override:94.9%;descent-override:29.66%;line-gap-override:0.0%;size-adjust:104.53%}
+@font-face{font-family:'Public Sans';font-style:normal;font-weight:100 900;font-display:swap;src:url(/assets/next/static/media/6e8df35dd937fa7a-s.a5971124.woff2) format("woff2");unicode-range:U+102-103,U+110-111,U+128-129,U+168-169,U+1A0-1A1,U+1AF-1B0,U+300-301,U+303-304,U+308-309,U+323,U+329,U+1EA0-1EF9,U+20AB}
+@font-face{font-family:'Public Sans';font-style:normal;font-weight:100 900;font-display:swap;src:url(/assets/next/static/media/fc2699ecc8323b38-s.dda394a5.woff2) format("woff2");unicode-range:U+100-2BA,U+2BD-2C5,U+2C7-2CC,U+2CE-2D7,U+2DD-2FF,U+304,U+308,U+329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Public Sans';font-style:normal;font-weight:100 900;font-display:swap;src:url(/assets/next/static/media/fa0520225c6f3d07-s.p.d28ba1c8.woff2) format("woff2");unicode-range:U+0-FF,U+131,U+152-153,U+2BB-2BC,U+2C6,U+2DA,U+2DC,U+304,U+308,U+329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Public Sans Fallback';src:local(Arial);ascent-override:90.59%;descent-override:21.46%;line-gap-override:0.0%;size-adjust:104.87%}
+@font-face{font-family:'Urbanist';font-style:normal;font-weight:100 900;font-display:swap;src:url(/assets/next/static/media/2421d155e98c9717-s.012a0f74.woff2) format("woff2");unicode-range:U+100-2BA,U+2BD-2C5,U+2C7-2CC,U+2CE-2D7,U+2DD-2FF,U+304,U+308,U+329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Urbanist';font-style:normal;font-weight:100 900;font-display:swap;src:url(/assets/next/static/media/5c8bbc89ca099f34-s.p.871a2d56.woff2) format("woff2");unicode-range:U+0-FF,U+131,U+152-153,U+2BB-2BC,U+2C6,U+2DA,U+2DC,U+304,U+308,U+329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Urbanist Fallback';src:local(Arial);ascent-override:95.93%;descent-override:25.24%;line-gap-override:0.0%;size-adjust:99.04%}
+
+/* ── Fonts — mirror the Sellzy template's system exactly ─────────────
+   Default is system-ui (template `--font-sans`); the three branded families
+   are applied selectively via `.font-public-sans` / `.font-dm-sans` /
+   `.font-urbanist` utilities, just like the template markup. */
+:root {
+  --font-sans:
+    ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-public-sans: 'Public Sans', 'Public Sans Fallback', system-ui, sans-serif;
+  --font-dm-sans:     'DM Sans', 'DM Sans Fallback', system-ui, sans-serif;
+  --font-urbanist:    'Urbanist', 'Urbanist Fallback', system-ui, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+
+  /* legacy aliases — keep so un-migrated ak/ms markup still resolves */
+  --font-display:  var(--font-urbanist);
+  --font-numeric:  var(--font-dm-sans);
+  --font-dm-serif: var(--font-public-sans);
+  --font-ibm-mono: var(--font-mono);
+}
+
+/* Template font utilities */
+.font-public-sans { font-family: var(--font-public-sans); }
+.font-dm-sans     { font-family: var(--font-dm-sans); }
+.font-urbanist    { font-family: var(--font-urbanist); }
+
+/* ── Design tokens — Sellzy (exact palette from the template) ────── */
+:root {
+  --bg:           #F4F6F8;   /* Sellzy page bg (gray-200 neutral) */
+  --surface:      #FFFFFF;
+  --surface-2:    #F9FAFB;   /* gray-50/100 */
+  --surface-3:    #F4F6F8;   /* gray-200 */
+  --sidebar-bg:   #04535C;   /* deep teal sidebar (primary-darker) */
+  --sidebar-label:#FFE16A;   /* gold section labels (template warning-light) */
+
+  --text-1:       #212B36;   /* gray-800 */
+  --text-2:       #637381;   /* gray-600 */
+  --text-3:       #919EAB;   /* gray-500 */
+
+  --border:       #DFE3E8;   /* gray-300 */
+  --border-2:     #C4CDD5;   /* gray-400 */
+
+  /* primary brand — Sellzy teal (#088178) */
+  --brand:        #088178;
+  /* Brand as INK on a surface. Split from --brand because that one is also a
+     fill under white type: brightening it for dark would fix the text and
+     break every button. */
+  --brand-ink:    #088178;
+  --brand-hover:  #056D6E;
+  --brand-pressed:#04535C;
+  --brand-light:  #CAF8E4;
+  --brand-border: #5ED9BA;
+
+  /* radii — Sellzy is soft & rounded */
+  --radius-card:  16px;
+  --radius-ctl:   8px;
+
+  /* Minimal-UI signature card shadow (built on the #919EAB grey) */
+  --shadow-card:  0 0 2px 0 rgba(145,158,171,0.20), 0 12px 24px -4px rgba(145,158,171,0.12);
+  --shadow-pop:   0 0 2px 0 rgba(145,158,171,0.24), 0 20px 40px -4px rgba(145,158,171,0.24);
+
+  /* semantic — Sellzy Minimal palette */
+  --green:        #00A544;
+  --green-light:  #E9FCD4;
+  --green-border: #C5F2A8;
+
+  --gold:         #D99A00;
+  --gold-light:   #FFF7CD;
+  --gold-border:  #FFE16A;
+
+  --error:        #CB0233;
+  --error-light:  #FFEBEC;
+  --error-border: #FCD1CA;
+
+  --info:         #1890FF;
+  --info-light:   #D0F2FF;
+
+  --purple:       #7C5CD6;
+  --purple-ink:   #7C5CD6;
+  --purple-light: #EBEBFF;
+  --orange:       #FA8C16;
+  --orange-light: #FCE6D3;
+  --teal:         var(--brand);
+  --teal-light:   var(--brand-light);
+
+  /* ── Sellzy neutral tokens, as RGB channels ────────────────────────
+   * The Sellzy reskin hardcoded its greys and text colours as hex in
+   * tailwind.config, so ~1000 utility classes across 74 files rendered the
+   * same in either theme: cards stayed white on a dark page and
+   * text-light-primary-text stayed near-black on top of them. Tagging each
+   * class with a `dark:` variant would mean editing every one of them and
+   * remembering forever. These drive the Tailwind tokens instead, so
+   * `bg-surface`, `text-light-primary-text`, `border-gray-300` and the rest
+   * follow the theme with no component change at all.
+   *
+   * Channels, not hex, because Tailwind composes them with <alpha-value> —
+   * `border-gray-500/20` has to keep working. */
+  --c-surface:    255 255 255;   /* card ground (was a literal bg-white) */
+  --c-surface-2:  249 250 251;
+
+  --c-gray-50:    249 250 251;
+  --c-gray-100:   249 250 251;
+  --c-gray-200:   244 246 248;
+  --c-gray-300:   223 227 232;
+  --c-gray-400:   196 205 213;
+  --c-gray-500:   145 158 171;
+  --c-gray-600:    99 115 129;
+  --c-gray-700:    69  79  91;
+  --c-gray-800:    33  43  54;
+  --c-gray-900:    22  28  36;
+
+  /* Pale chip tints. StatusPill's `bg-X/16` composites over the card and
+   * themes itself; these solid `-lighter` fills do not, and the brightened
+   * text below would otherwise sit on a pale chip at 1.7:1. */
+  /* Badge ink + hairline per variant. Badge.tsx paired themed backgrounds
+     with hardcoded light-theme text, so `Open` landed at 2.14:1 once the
+     background went dark. */
+  --badge-success-ink: #027A38;  --badge-success-line: #B4E8CE;
+  --badge-warning-ink: #865308;  --badge-warning-line: #EDD090;
+  --badge-error-ink:   #CB0233;  --badge-error-line:   #E8C0BC;
+  --badge-info-ink:    #1890FF;  --badge-info-line:    #BFDBFE;
+  --badge-purple-ink:  #7C5CD6;  --badge-purple-line:  #DDD6FE;
+
+  --c-primary-lighter:   202 248 228;
+  --c-error-lighter:     252 209 202;
+  --c-warning-lighter:   255 247 205;
+  --c-info-lighter:      208 242 255;
+  --c-success-lighter:   233 252 212;
+  --c-secondary-lighter: 214 228 255;
+
+  --c-text-primary:   33  37  41;
+  --c-text-secondary: 73  80  87;
+  --c-text-disabled: 145 158 171;
+
+  /* pastel stat-card fills — Sellzy accent-1..7, exact */
+  --pastel-mint:  #A0E2E0;
+  --pastel-gold:  #FFEB69;
+  --pastel-peach: #FFC091;
+  --pastel-pink:  #FFD6EF;
+  --pastel-blue:  #92BDF5;
+  --pastel-amber: #FAB851;
+  --pastel-green: #9EE872;
+}
+
+/*
+ * Dark theme — Fluent-style dark neutrals. The no-FOUC script resolves the
+ * theme (saved choice, else OS preference) and stamps data-theme on <html>,
+ * so this single block covers both. Strong accent colors (brand/green/error/…)
+ * keep their hue; only the neutral surfaces/text/borders and the pale
+ * "-light" chip tints are remapped.
+ */
+:root[data-theme="dark"] {
+  --bg:           #1B1A19;
+  --surface:      #262524;
+  --surface-2:    #201F1E;
+  --surface-3:    #323130;
+  --sidebar-bg:   #1B1A19;
+
+  --text-1:       #F3F2F1;
+  --text-2:       #C8C6C4;
+  --text-3:       #979593;
+
+  --border:       #3B3A39;
+  --border-2:     #484644;
+
+  --shadow-card:  0 0 2px 0 rgba(0,0,0,0.40), 0 12px 24px -4px rgba(0,0,0,0.36);
+  --shadow-pop:   0 0 2px 0 rgba(0,0,0,0.48), 0 20px 40px -4px rgba(0,0,0,0.48);
+
+  --brand-light:  #10243A;
+  --brand-border: #234A6B;
+  --green-light:  #0E2A12;
+  --green-border: #1E4A22;
+  --gold-light:   #332D0A;
+  --gold-border:  #574B18;
+  --error-light:  #3A1416;
+  --error-border: #6B2A2E;
+  --purple-light: #241733;
+  --purple-ink:   #A68CF0;
+  --orange-light: #3A230F;
+  --teal-light:   #0E3335;
+  --info-light:   #0E2233;
+  --brand-ink:    #2ec5ae;
+
+  /* Sellzy neutrals, remapped. The scale keeps its meaning — 50 is the
+   * quietest ground, 900 the loudest text — so every existing utility lands
+   * the right way round once the numbers invert. gray-500 is deliberately
+   * unchanged: it is used almost entirely as `/20` hairlines and muted
+   * icons, and a cool mid-grey reads correctly over both grounds. */
+  --c-surface:    38  37  36;
+  --c-surface-2:  32  31  30;
+
+  --c-gray-50:    32  31  30;
+  --c-gray-100:   46  45  44;
+  --c-gray-200:   50  49  48;
+  --c-gray-300:   59  58  57;
+  --c-gray-400:   72  70  68;
+  --c-gray-500:  145 158 171;
+  --c-gray-600:  200 198 196;
+  --c-gray-700:  216 214 212;
+  --c-gray-800:  232 230 228;
+  --c-gray-900:  243 242 241;
+
+  --badge-success-ink: #5FD07A;  --badge-success-line: #24512F;
+  --badge-warning-ink: #F0B429;  --badge-warning-line: #574B18;
+  --badge-error-ink:   #FF7A8C;  --badge-error-line:   #6B2A2E;
+  --badge-info-ink:    #6BB8FF;  --badge-info-line:    #234A6B;
+  --badge-purple-ink:  #A68CF0;  --badge-purple-line:  #3E2B5C;
+
+  --c-primary-lighter:    14  51  53;
+  --c-error-lighter:      58  20  22;
+  --c-warning-lighter:    51  45  10;
+  --c-info-lighter:       14  34  51;
+  --c-success-lighter:    14  42  18;
+  --c-secondary-lighter:  16  36  58;
+
+  --c-text-primary:   243 242 241;
+  --c-text-secondary: 200 198 196;
+  --c-text-disabled:  151 149 147;
+}
+
+/* ── Base ───────────────────────────────────────── */
+* { box-sizing: border-box; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  /* 16px root matches the Sellzy template (its --text-base is 1rem at the
+     browser default). The old 14px root scaled every rem-based Tailwind size
+     ~12% smaller than the template. */
+  font-size: 16px;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: var(--brand-light); color: var(--brand-pressed); }
+
+/* ── Scrollbar ──────────────────────────────────── */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--surface-3); border-radius: 5px;
+  border: 2px solid var(--surface);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--border-2); }
+
+/* Sellzy sidebar scrollbar — subtle white-on-teal (template `custom-scrollbar-white`) */
+.custom-scrollbar-white::-webkit-scrollbar { width: 6px; height: 6px; }
+.custom-scrollbar-white::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar-white::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.16); border-radius: 3px; border: none;
+}
+.custom-scrollbar-white::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.28); }
+.custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; border: none; }
+
+/* ── Font helpers ───────────────────────────────── */
+.font-serif { font-family: var(--font-sans); }
+.font-mono  { font-family: var(--font-mono); }
+.tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* ── Sidebar dot texture ────────────────────────── */
+.sidebar-dots {
+  background-image: radial-gradient(
+    circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0
+  );
+  background-size: 22px 22px;
+}
+
+/* ── Sidebar nav ────────────────────────────────── */
+.nav-group-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.10em;
+  text-transform: uppercase; color: rgba(255,255,255,0.42);
+  padding: 14px 14px 6px;
+}
+.nav-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 12px 7px 14px; border-radius: 4px; margin-bottom: 1px;
+  font-size: 13px; font-weight: 400; color: rgba(255,255,255,0.78);
+  text-decoration: none; transition: background 0.10s; position: relative;
+}
+.nav-link:hover {
+  background: rgba(255,255,255,0.06);
+  color: #FFFFFF;
+}
+.nav-link.is-active {
+  background: rgba(15,108,189,0.18);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+.nav-link.is-active::before {
+  content: '';
+  position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 18px; border-radius: 0 2px 2px 0;
+  background: var(--brand);
+}
+.nav-code {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.40);
+  margin-left: auto;
+}
+.nav-link.is-active .nav-code { color: rgba(255,255,255,0.65); }
+
+/* ── Stat card ──────────────────────────────────── */
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.stat-card:hover {
+  border-color: var(--border-2);
+  box-shadow: 0 1.6px 3.6px rgba(0,0,0,0.06), 0 0.3px 0.9px rgba(0,0,0,0.04);
+}
+.stat-card::before {
+  content: '';
+  position: absolute; left: 0; top: 14px; bottom: 14px;
+  width: 3px; border-radius: 0 2px 2px 0;
+  background: var(--card-accent, var(--brand));
+}
+
+.stat-number {
+  font-family: var(--font-sans);
+  font-size: 28px; font-weight: 600; line-height: 1.05;
+  color: var(--text-1);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.stat-number-serif { /* legacy — falls back to sans now */
+  font-family: var(--font-sans); font-size: 28px; font-weight: 600;
+  line-height: 1; color: var(--text-1);
+}
+
+/* ── Card container ─────────────────────────────── */
+.ak-card {
+  background: var(--surface);
+  border: 1px solid transparent;
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+/* ── Toolbar ────────────────────────────────────── */
+.ak-toolbar {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: 10px; padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+/* ── Table ──────────────────────────────────────── */
+.ak-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+.ak-table thead tr {
+  background: var(--surface-3);
+  border-bottom: none;
+}
+.ak-table thead th {
+  text-align: left; padding: 14px 16px;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.02em;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.ak-table thead th:first-child { padding-left: 24px; border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+.ak-table thead th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+
+.ak-table tbody tr {
+  border-bottom: 1px dashed var(--border);
+  transition: background 0.10s;
+}
+.ak-table tbody tr:hover { background: var(--surface-2); }
+.ak-table tbody tr:last-child { border-bottom: none; }
+
+.ak-table tbody td {
+  padding: 16px 16px; color: var(--text-1); vertical-align: middle;
+  font-size: 14px;
+}
+.ak-table tbody td:first-child { padding-left: 24px; }
+
+/* ── Footer ─────────────────────────────────────── */
+.ak-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px; padding: 10px 18px;
+  border-top: 1px solid var(--border);
+  font-size: 12px; color: var(--text-3); background: var(--surface-2);
+}
+
+/* ── Inputs & Selects ───────────────────────────── */
+.ak-input, .ak-select {
+  /* background-COLOR, not the shorthand: `background` resets background-image,
+     which would wipe the chevron the `select` rule paints. */
+  background-color: var(--surface); border: 1px solid var(--border-2);
+  border-radius: 8px; color: var(--text-1); font-size: 14px;
+  padding: 8px 13px; font-family: inherit; outline: none;
+  transition: border-color 0.10s, box-shadow 0.10s;
+  height: 40px;
+}
+/* Room for the chevron the `select` rule below paints. A class beats a bare
+   element selector, so this cannot be left to that rule's padding-right. */
+.ak-select { padding-right: 32px; }
+.ak-input:hover, .ak-select:hover { border-color: var(--text-2); }
+.ak-input:focus, .ak-select:focus {
+  border-color: var(--brand-ink);
+  box-shadow: 0 0 0 1px var(--brand);
+}
+.ak-input::placeholder { color: var(--text-3); }
+.ak-select option { background: var(--surface); color: var(--text-1); }
+
+/* Every <select> gets the template's chevron.
+ *
+ * The rounded filter pills are drawn with `appearance-none`, which removes the
+ * browser's own arrow — so the ones that did not also paint an icon rendered as
+ * a bare grey pill with no hint that it opened anything. Three pages (coupons,
+ * customers) had each pasted the same inline background-image to fix it
+ * locally; the rest, including the filter on every ResourceList page and the
+ * FloatingSelect on every add/edit form, had nothing at all.
+ *
+ * One rule instead, on the element itself, so a select cannot be added without
+ * it. `padding-right` reserves the space; components that set their own
+ * pr-8 land in the same place. */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23637381'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  background-size: 1.1em;
+  padding-right: 2rem;
+}
+/* Same glyph, remapped to the dark palette's secondary text — but only for the
+ * selects whose surface actually goes dark. The `.ak-*` controls are painted
+ * from CSS variables, so they follow the theme. The Sellzy pill components do
+ * not: FilterPill, OrderSelect and FloatingSelect are built from fixed Tailwind
+ * tokens (bg-gray-200, text-light-primary-text), so their pill stays light in
+ * dark mode and the light chevron is the one that belongs on it. Repainting
+ * those too dropped the glyph from 4.5:1 to 2.75:1 — under the 3:1 floor for a
+ * control affordance. Widen this selector only when those components learn to
+ * theme, or the contrast goes backwards again. */
+:root[data-theme="dark"] select.ak-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23979593'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+}
+/* Brand and status colours as TEXT, on the dark theme's card.
+ *
+ * The hues are tuned for ink on white and several of them fail on #262524:
+ * text-primary 3.22:1, text-primary-dark 2.49:1, text-error 2.62:1 — all under
+ * the 4.5:1 needed to read. Only the text utilities are lifted; the matching
+ * `bg-*` keep their hue, because a button's fill still carries white type and
+ * brightening it would break that instead. */
+:root[data-theme="dark"] .text-primary       { color: #2ec5ae; }  /* 7.08:1 */
+:root[data-theme="dark"] .text-primary-dark  { color: #35cdb5; }  /* 7.69:1 */
+:root[data-theme="dark"] .text-error         { color: #ff7a8c; }  /* 6.13:1 */
+:root[data-theme="dark"] .text-error-dark    { color: #ff8fa0; }  /* 7.06:1 */
+:root[data-theme="dark"] .text-info-dark     { color: #6bb8ff; }
+:root[data-theme="dark"] .text-success-dark  { color: #5fd07a; }
+:root[data-theme="dark"] .text-warning-dark  { color: #f0b429; }  /* was 4.48:1 */
+:root[data-theme="dark"] .text-purple        { color: #a68cf0; }  /* was 3.18:1 */
+
+/* Pastel accent tiles keep their light fill in both themes — they are the one
+ * deliberately un-themed surface in the admin. Any themed text token inside one
+ * therefore has to be pinned back to ink, or it inverts to near-white on mint.
+ * Written as a descendant rule rather than pinned per tile so a stat card added
+ * later cannot reintroduce the bug. */
+:root[data-theme="dark"] [class*="bg-accent-"] .text-light-primary-text,
+:root[data-theme="dark"] [class*="bg-accent-"] .text-light-secondary-text,
+:root[data-theme="dark"] [class*="bg-accent-"] .text-light-disabled-text { color: #212529; }
+:root[data-theme="dark"] [class*="bg-accent-"] .text-light-secondary-text { color: #495057; }
+
+/* A multi-row select is a list, not a dropdown — no chevron to draw. */
+select[multiple], select[size]:not([size="1"]) {
+  background-image: none;
+  padding-right: 0.85rem;
+}
+
+.ak-input-wrap { position: relative; }
+.ak-input-wrap .ak-input { padding-left: 32px; width: 100%; }
+.ak-input-wrap .ak-icon-prefix {
+  position: absolute; left: 10px; top: 50%;
+  transform: translateY(-50%); pointer-events: none; color: var(--text-3);
+}
+
+/* ── Buttons (Fluent) ───────────────────────────── */
+.ak-btn-primary {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 16px; font-size: 14px; font-weight: 700;
+  border-radius: 8px; background: var(--brand); color: #fff;
+  border: 1px solid var(--brand); cursor: pointer;
+  font-family: inherit; white-space: nowrap; height: 40px;
+  box-shadow: 0 8px 16px 0 rgba(8,129,120,0.24);
+  transition: background 0.10s, border-color 0.10s, box-shadow 0.10s;
+}
+.ak-btn-primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+.ak-btn-primary:active { background: var(--brand-pressed); border-color: var(--brand-pressed); }
+
+.ak-btn-secondary {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 14px; font-size: 14px; font-weight: 700;
+  border-radius: 8px; background: var(--surface); color: var(--text-1);
+  border: 1px solid var(--border-2); cursor: pointer;
+  font-family: inherit; white-space: nowrap; height: 40px;
+  transition: all 0.10s;
+}
+.ak-btn-secondary:hover {
+  background: var(--surface-2); border-color: var(--text-2);
+}
+.ak-btn-secondary:active { background: var(--surface-3); }
+
+/* ── Icon button ────────────────────────────────── */
+.ak-icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 4px;
+  background: transparent; border: none; color: var(--text-2);
+  cursor: pointer; transition: background 0.10s;
+}
+.ak-icon-btn:hover { background: var(--surface-2); color: var(--text-1); }
+.ak-icon-btn:active { background: var(--surface-3); }
+
+/* ── Alert banners ──────────────────────────────── */
+.ak-alert-warning {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 14px; border-radius: 4px;
+  background: var(--gold-light); border: 1px solid var(--gold-border);
+  color: #6E5A00; font-size: 13px;
+}
+.ak-alert-danger {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 14px; border-radius: 4px;
+  background: var(--error-light); border: 1px solid var(--error-border);
+  color: var(--error); font-size: 13px;
+}
+
+/* ── Page typography ────────────────────────────── */
+.ak-page-title {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 800; color: var(--text-1);
+  line-height: 1.2; letter-spacing: -0.01em;
+}
+.ak-page-sub   { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+
+/* dept-code chip — a relic of the previous corporate-admin design. The Sellzy
+   template uses no code chips in page headers, so hide it globally rather than
+   editing every page. */
+.dept-code { display: none; }
+
+/* ── Pager ──────────────────────────────────────── */
+.ak-pager { display: flex; align-items: center; gap: 2px; }
+.ak-pager button {
+  padding: 4px 9px; border-radius: 3px; font-size: 12px;
+  background: transparent; border: 1px solid transparent;
+  color: var(--text-2); cursor: pointer; transition: background 0.10s;
+  font-family: inherit; min-width: 28px;
+}
+.ak-pager button.active {
+  background: var(--brand); border-color: var(--brand-ink); color: #fff;
+}
+.ak-pager button:not(.active):hover {
+  background: var(--surface-2); color: var(--text-1);
+}
+
+/* ── Progress bar (in card) ─────────────────────── */
+.progress-track {
+  height: 6px; background: var(--surface-2);
+  border-radius: 3px; overflow: hidden;
+}
+.progress-fill { height: 100%; border-radius: 3px; }
+
+/* ── Service status dot ─────────────────────────── */
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.status-dot.online  { background: var(--green); box-shadow: 0 0 0 3px rgba(16,124,16,0.18); }
+.status-dot.offline { background: var(--error); }
+
+/* ── Analytics bar chart ────────────────────────── */
+.chart-bar {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1;
+}
+.chart-bar-fill {
+  width: 100%; border-radius: 3px 3px 0 0; transition: height 0.3s ease;
+}
+
+/* ── Deadline day box ───────────────────────────── */
+.day-box {
+  width: 50px; height: 50px; border-radius: 6px; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.day-box .num {
+  font-family: var(--font-sans);
+  font-size: 22px; font-weight: 600; line-height: 1;
+}
+.day-box .lbl { font-size: 9px; margin-top: 1px; }
+
+/* ── Tabs ───────────────────────────────────────── */
+.ak-tab-bar {
+  display: flex; align-items: center; gap: 0;
+  border-bottom: 1px solid var(--border);
+  width: 100%;
+}
+.ak-tab {
+  padding: 8px 14px; font-size: 13px; font-weight: 600;
+  color: var(--text-2); background: transparent; border: none;
+  cursor: pointer; font-family: inherit;
+  transition: all 0.10s; white-space: nowrap;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.ak-tab:hover { color: var(--text-1); }
+.ak-tab.is-active {
+  color: var(--brand-ink);
+  border-bottom-color: var(--brand-ink);
+}
+.ak-tab .count {
+  display: inline-block; margin-left: 6px; padding: 1px 6px;
+  font-size: 11px; font-weight: 600; border-radius: 999px;
+  background: var(--surface-3); color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.ak-tab.is-active .count { background: var(--brand-light); color: var(--brand-ink); }
+
+/* Vertical settings tabs */
+.ak-vtab-list { display: flex; flex-direction: column; gap: 1px; }
+.ak-vtab {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; border-radius: 4px;
+  font-size: 13px; color: var(--text-2); font-weight: 500;
+  background: transparent; border: none; cursor: pointer;
+  font-family: inherit; text-align: left; width: 100%;
+  transition: all 0.10s;
+}
+.ak-vtab:hover { background: var(--surface-2); color: var(--text-1); }
+.ak-vtab.is-active {
+  background: var(--brand-light); color: var(--brand-ink); font-weight: 600;
+}
+
+/* ── Topbar search trigger (Cmd+K) ──────────────── */
+.ak-search-trigger {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 11px; min-width: 280px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 4px; color: var(--text-3); font-size: 12px;
+  cursor: pointer; font-family: inherit; font-weight: 400;
+  transition: all 0.10s; height: 32px;
+}
+.ak-search-trigger:hover {
+  background: var(--surface);
+  border-color: var(--border-2); color: var(--text-2);
+}
+.ak-search-trigger .kbd {
+  margin-left: auto; padding: 1px 6px; font-family: var(--font-mono);
+  font-size: 10px; color: var(--text-2); background: var(--surface);
+  border: 1px solid var(--border); border-radius: 3px;
+}
+
+/* ── Drawer (right-side panel) ──────────────────── */
+.ak-drawer-overlay {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(0,0,0,0.32);
+  animation: fade-in 0.15s ease-out;
+}
+.ak-drawer {
+  position: fixed; right: 0; top: 0; bottom: 0; z-index: 61;
+  width: min(420px, 100vw); display: flex; flex-direction: column;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: -8px 0 32px rgba(0,0,0,0.12);
+  animation: slide-in-right 0.20s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+.ak-drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+}
+.ak-drawer-body { flex: 1; overflow-y: auto; }
+.ak-drawer-footer {
+  border-top: 1px solid var(--border); padding: 10px 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slide-in-right { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+/* ── Command palette (Cmd+K) ────────────────────── */
+.ak-cmdk-overlay {
+  position: fixed; inset: 0; z-index: 70;
+  background: rgba(0,0,0,0.36);
+  animation: fade-in 0.12s ease-out;
+  padding-top: 12vh;
+  display: flex; justify-content: center;
+}
+.ak-cmdk {
+  width: min(620px, 92vw); height: fit-content; max-height: 70vh;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 32px 64px rgba(0,0,0,0.18);
+  display: flex; flex-direction: column; overflow: hidden;
+  animation: cmdk-pop 0.16s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+@keyframes cmdk-pop {
+  from { transform: translateY(-8px) scale(0.98); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+.ak-cmdk-input-wrap {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+}
+.ak-cmdk-input {
+  flex: 1; border: none; outline: none; background: transparent;
+  font-size: 15px; color: var(--text-1); font-family: inherit;
+}
+.ak-cmdk-input::placeholder { color: var(--text-3); }
+.ak-cmdk-body { overflow-y: auto; padding: 6px; }
+.ak-cmdk-section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--text-3);
+  padding: 10px 12px 4px;
+}
+.ak-cmdk-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 12px; border-radius: 4px; cursor: pointer;
+  font-size: 13px; color: var(--text-2);
+  transition: background 0.08s;
+}
+.ak-cmdk-item .meta {
+  margin-left: auto; font-size: 11px; color: var(--text-3);
+  font-family: var(--font-mono);
+}
+.ak-cmdk-item.is-focused {
+  background: var(--brand-light); color: var(--brand-ink);
+}
+.ak-cmdk-item .icon-wrap {
+  width: 26px; height: 26px; border-radius: 4px;
+  background: var(--surface-2); color: var(--text-2);
+  display: flex; align-items: center; justify-content: center;
+}
+.ak-cmdk-item.is-focused .icon-wrap {
+  background: var(--brand); color: #fff;
+}
+.ak-cmdk-empty {
+  padding: 32px 18px; text-align: center;
+  color: var(--text-3); font-size: 13px;
+}
+.ak-cmdk-footer {
+  padding: 8px 16px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 16px;
+  font-size: 11px; color: var(--text-3);
+  background: var(--surface-2);
+}
+.ak-cmdk-footer .kbd {
+  font-family: var(--font-mono); font-size: 10px;
+  padding: 1px 5px; background: var(--surface); border-radius: 3px;
+  border: 1px solid var(--border); color: var(--text-2);
+}
+
+/* ── Bulk action bar ────────────────────────────── */
+.ak-bulk-bar {
+  display: flex; align-items: center; gap: 14px;
+  padding: 9px 18px; background: var(--brand-light);
+  border-bottom: 1px solid var(--brand-border);
+  font-size: 12px; color: var(--brand-ink);
+}
+.ak-bulk-bar .count { font-weight: 700; font-variant-numeric: tabular-nums; }
+.ak-bulk-bar .actions { margin-left: auto; display: flex; gap: 6px; }
+.ak-bulk-bar button {
+  padding: 5px 11px; border-radius: 3px; font-size: 11px; font-weight: 600;
+  background: var(--surface); border: 1px solid var(--brand-border); color: var(--brand-ink);
+  cursor: pointer; font-family: inherit;
+}
+.ak-bulk-bar button:hover { background: var(--surface-2); }
+
+/* ── Sortable th ───────────────────────────────── */
+.ak-table thead th.sortable { cursor: pointer; user-select: none; }
+.ak-table thead th.sortable:hover { color: var(--text-1); }
+.ak-table thead th.sortable .arr { opacity: 0.40; margin-left: 4px; }
+.ak-table thead th.sortable.asc  .arr,
+.ak-table thead th.sortable.desc .arr { opacity: 1; color: var(--brand-ink); }
+
+/* row checkbox */
+.ak-row-check {
+  width: 14px; height: 14px; accent-color: var(--brand-ink);
+  cursor: pointer;
+}
+
+/* clickable row */
+.ak-table tbody tr.is-clickable { cursor: pointer; }
+
+/* ── Product tile (catalog grid) ───────────────── */
+.ak-product-tile {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px; cursor: pointer;
+  transition: all 0.10s; display: flex; flex-direction: column;
+}
+.ak-product-tile:hover {
+  border-color: var(--border-2);
+  box-shadow: 0 1.6px 3.6px rgba(0,0,0,0.06), 0 0.3px 0.9px rgba(0,0,0,0.04);
+}
+.ak-product-thumb {
+  aspect-ratio: 1 / 1; border-radius: 6px;
+  background: linear-gradient(135deg, var(--brand-light), var(--surface-2));
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 14px; font-weight: 700; color: var(--brand-ink);
+  letter-spacing: 0.04em; margin-bottom: 12px;
+  position: relative; overflow: hidden;
+}
+.ak-product-thumb::after {
+  content: ''; position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(15,108,189,0.10) 1px, transparent 0);
+  background-size: 14px 14px;
+}
+/* Only the fallback initials sit in the flow; the photo and the overlays are
+   placed absolutely, and forcing them relative shrank the photo and pushed
+   the status pill into a clipped strip beside it. */
+.ak-product-thumb > :not(.absolute) { position: relative; z-index: 1; }
+
+/* ── Empty state ───────────────────────────────── */
+.ak-empty {
+  padding: 56px 24px; text-align: center;
+  color: var(--text-3); font-size: 13px;
+}
+.ak-empty .icon {
+  width: 44px; height: 44px; margin: 0 auto 12px;
+  border-radius: 50%; background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-3);
+}
+
+/* ── Notification list ─────────────────────────── */
+.ak-notif {
+  display: flex; gap: 12px; padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.10s;
+}
+.ak-notif:hover { background: var(--surface-2); }
+.ak-notif.is-unread { background: var(--brand-light); }
+.ak-notif:hover.is-unread { background: var(--brand-light); filter: brightness(0.98); }
+.ak-notif .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  margin-top: 6px; flex-shrink: 0;
+}
+.ak-notif .body { flex: 1; min-width: 0; }
+.ak-notif .title { font-weight: 600; font-size: 13px; color: var(--text-1); margin-bottom: 2px; }
+.ak-notif .desc { font-size: 12px; color: var(--text-2); line-height: 1.45; }
+.ak-notif .time { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); margin-top: 4px; }
+
+/* ── User menu dropdown ────────────────────────── */
+.ak-menu {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  padding: 4px; min-width: 220px;
+}
+.ak-menu-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 10px; border-radius: 3px;
+  font-size: 13px; color: var(--text-1); cursor: pointer;
+  background: transparent; border: none; width: 100%;
+  text-align: left; font-family: inherit; transition: background 0.08s;
+}
+.ak-menu-item:hover { background: var(--surface-2); }
+.ak-menu-item.danger { color: var(--error); }
+.ak-menu-item.danger:hover { background: var(--error-light); }
+.ak-menu-divider { height: 1px; background: var(--border); margin: 4px 0; }
+.ak-menu-section {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--text-3);
+  padding: 8px 10px 4px;
+}
+
+/* ── Sparkline ─────────────────────────────────── */
+.spark { display: block; }
+.spark path.line { fill: none; stroke-width: 1.6; }
+.spark path.area { stroke: none; opacity: 0.18; }
+
+/* ── Form inputs (settings) ────────────────────── */
+.ak-field { display: flex; flex-direction: column; gap: 6px; }
+.ak-label {
+  font-size: 12px; font-weight: 600; color: var(--text-1);
+}
+.ak-help { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+.ak-toggle {
+  position: relative; width: 36px; height: 20px;
+  background: var(--border-2); border-radius: 999px;
+  cursor: pointer; transition: background 0.14s; border: none;
+  flex-shrink: 0;
+}
+.ak-toggle::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; transition: transform 0.16s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.20);
+}
+.ak-toggle.is-on { background: var(--brand); }
+.ak-toggle.is-on::after { transform: translateX(16px); }
+
+/* ── Section header ────────────────────────────── */
+.ak-section-h {
+  font-size: 16px; font-weight: 600; color: var(--text-1); margin-bottom: 4px;
+}
+.ak-section-sub { font-size: 13px; color: var(--text-2); margin-bottom: 16px; }
+
+/* ── Order detail layout ───────────────────────── */
+.ak-timeline { padding: 0 4px; }
+.ak-timeline-item {
+  display: flex; gap: 14px; position: relative;
+  padding: 0 0 18px 0;
+}
+.ak-timeline-item::before {
+  content: ''; position: absolute; left: 9px; top: 22px; bottom: -4px;
+  width: 1px; background: var(--border);
+}
+.ak-timeline-item:last-child::before { display: none; }
+.ak-timeline-dot {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--surface); border: 2px solid var(--brand);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  z-index: 1; margin-top: 1px;
+}
+.ak-timeline-dot.muted { border-color: var(--border-2); }
+.ak-timeline-body { flex: 1; min-width: 0; padding-bottom: 2px; }
+.ak-timeline-body .title { font-size: 13px; font-weight: 500; color: var(--text-1); }
+.ak-timeline-body .meta {
+  font-size: 11px; color: var(--text-3); margin-top: 1px;
+  font-family: var(--font-mono);
+}
+
+/* ── Activity feed item (Home) ─────────────────── */
+.ak-activity-item {
+  display: flex; gap: 12px; padding: 10px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.ak-activity-item:last-child { border-bottom: none; }
+.ak-activity-time {
+  font-family: var(--font-mono);
+  font-size: 11px; color: var(--text-3);
+  min-width: 38px; padding-top: 1px; font-variant-numeric: tabular-nums;
+}
+.ak-activity-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  margin-top: 7px; flex-shrink: 0;
+}
+.ak-activity-text { flex: 1; font-size: 12px; color: var(--text-2); line-height: 1.55; }
+
+/* ── Segmented control ─────────────────────────── */
+.ak-segmented {
+  display: inline-flex; padding: 2px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.ak-segmented button {
+  padding: 5px 11px; font-size: 12px; font-weight: 500;
+  color: var(--text-2); background: transparent; border: none;
+  border-radius: 3px; cursor: pointer; font-family: inherit;
+}
+.ak-segmented button.is-active {
+  background: var(--surface); color: var(--text-1); font-weight: 600;
+  box-shadow: 0 0.5px 1.5px rgba(0,0,0,0.10);
+}
+
+/* ── Loading: Fluent spinner ───────────────────── */
+.ak-spinner {
+  display: inline-block;
+  border-radius: 50%;
+  border: 2px solid var(--surface-3);
+  border-top-color: var(--brand-ink);
+  animation: ak-spin 0.8s linear infinite;
+}
+.ak-spinner.size-sm { width: 14px; height: 14px; border-width: 1.5px; }
+.ak-spinner.size-md { width: 24px; height: 24px; border-width: 2px; }
+.ak-spinner.size-lg { width: 40px; height: 40px; border-width: 3px; }
+.ak-spinner.size-xl { width: 64px; height: 64px; border-width: 4px; }
+@keyframes ak-spin { to { transform: rotate(360deg); } }
+
+/* ── Loading: Fluent skeleton (shimmer) ────────── */
+.ak-skeleton {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 0%,
+    var(--surface-3) 40%,
+    var(--surface-2) 80%
+  );
+  background-size: 200% 100%;
+  animation: ak-shimmer 1.4s ease-in-out infinite;
+  border-radius: 4px;
+}
+@keyframes ak-shimmer {
+  0%   { background-position: -100% 0; }
+  100% { background-position: 100% 0; }
+}
+
+/* ── Loading: top progress bar ─────────────────── */
+.ak-progress-top {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 2px; background: transparent; pointer-events: none;
+  overflow: hidden;
+}
+.ak-progress-top::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--brand) 30%,
+    var(--brand-hover) 60%,
+    transparent 100%);
+  width: 40%;
+  animation: ak-progress-slide 1.2s linear infinite;
+}
+@keyframes ak-progress-slide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+/* ── Loading: dots ─────────────────────────────── */
+.ak-dots { display: inline-flex; gap: 4px; }
+.ak-dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--brand);
+  animation: ak-dots 1.2s ease-in-out infinite;
+}
+.ak-dots span:nth-child(2) { animation-delay: 0.16s; }
+.ak-dots span:nth-child(3) { animation-delay: 0.32s; }
+@keyframes ak-dots {
+  0%, 60%, 100% { opacity: 0.30; transform: scale(0.85); }
+  30%           { opacity: 1; transform: scale(1); }
+}
+
+/* ── Focus ring (Fluent) ───────────────────────── */
+button:focus-visible, a:focus-visible, [role="button"]:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+  border-radius: 4px;
+}
+.ak-input:focus-visible, .ak-select:focus-visible {
+  outline: none;
+}
+
+/* ── Utility: line-clamp safe ──────────────────── */
+.line-clamp-2 {
+  display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* ── Microsoft 365 / Azure admin center shell ───── */
+.ms-app {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text-1);
+}
+
+.ms-suitebar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 70;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px;
+  background: var(--surface);
+  color: var(--text-1);
+  border-bottom: 1px solid var(--border);
+}
+
+.ms-suite-icon {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 10px;
+  color: var(--text-2);
+  background: transparent;
+  cursor: pointer;
+}
+.ms-suite-icon:hover { background: var(--surface-3); color: var(--text-1); }
+
+.ms-suite-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 210px;
+}
+.ms-suite-title {
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--text-1);
+}
+.ms-suite-env {
+  font-size: 11px;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-3);
+}
+
+.ms-suite-search {
+  height: 36px;
+  flex: 1;
+  max-width: 460px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.ms-suite-search:hover { background: var(--surface-3); }
+.ms-suite-search span { color: var(--text-3); }
+.ms-suite-search kbd {
+  margin-left: auto;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 1px 6px;
+}
+
+.ms-suite-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.ms-notif-dot {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--error);
+  border: 2px solid var(--surface);
+}
+
+.ms-user-pill {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-1);
+  padding: 0 10px 0 4px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.ms-user-pill:hover { background: var(--surface-3); }
+.ms-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--brand);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+}
+.ms-role-code {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--surface-3);
+  color: var(--text-2);
+}
+
+.ms-nav {
+  position: fixed;
+  top: 48px;
+  left: 0;
+  bottom: 0;
+  z-index: 60;
+  width: 256px;
+  background: var(--sidebar-bg);
+  border-right: none;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(0);
+}
+.ms-nav-head {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.ms-product-mark {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--brand);
+  color: #fff;
+}
+.ms-nav-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+}
+.ms-nav-subtitle {
+  margin-top: 1px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.50);
+}
+.ms-nav-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 12px;
+}
+.ms-nav-section { margin-bottom: 10px; }
+.ms-nav-label {
+  padding: 12px 10px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--sidebar-label);
+}
+.ms-nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: rgba(255,255,255,0.82);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.10s, color 0.10s;
+}
+.ms-nav-link:hover {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+.ms-nav-link.is-active {
+  background: var(--brand);
+  color: #fff;
+  box-shadow: 0 6px 16px -6px rgba(23,163,149,0.7);
+}
+.ms-nav-badge {
+  margin-left: auto;
+  min-width: 22px;
+  text-align: center;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.16);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.ms-nav-link.is-active .ms-nav-badge {
+  background: rgba(255,255,255,0.28);
+  color: #fff;
+}
+
+.ms-workspace {
+  min-height: 100vh;
+  padding-top: 48px;
+  padding-left: 256px;
+}
+.ms-pagebar {
+  position: sticky;
+  top: 48px;
+  z-index: 40;
+  min-height: 74px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 28px;
+  background: rgba(238,244,242,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.ms-breadcrumb {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-bottom: 2px;
+}
+.ms-page-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.12;
+  font-weight: 800;
+  color: var(--text-1);
+}
+.ms-pagebar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ms-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 700;
+}
+.ms-chip.success {
+  border-color: var(--green-border);
+  background: var(--green-light);
+  color: var(--green);
+}
+.ms-menu-button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text-2);
+  display: grid;
+  place-items: center;
+}
+.ms-content {
+  padding: 24px 28px 40px;
+}
+.ms-nav-scrim { display: none; }
+
+/* Sellzy component refinements — soft & rounded */
+.ak-card,
+.stat-card {
+  border-radius: var(--radius-card);
+  box-shadow: 0 1px 2px rgba(20,60,55,0.05), 0 10px 26px -20px rgba(20,60,55,0.30);
+}
+.ak-card { border-color: var(--border); }
+.ak-card:hover { border-color: var(--border-2); }
+.stat-card { padding: 18px 20px; }
+.stat-card::before {
+  top: 0;
+  bottom: auto;
+  width: 100%;
+  height: 3px;
+  border-radius: 0;
+}
+.stat-number {
+  font-size: 28px;
+  letter-spacing: -0.01em;
+}
+.ak-toolbar {
+  min-height: 52px;
+  background: var(--surface);
+  padding: 10px 18px;
+}
+.ak-table thead tr { background: var(--surface-2); }
+.ak-table thead th {
+  height: 38px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+.ak-table tbody td { height: 46px; }
+.ak-table tbody tr:hover { background: var(--brand-light); }
+.ak-btn-primary,
+.ak-btn-secondary,
+.ak-icon-btn,
+.ak-input,
+.ak-select {
+  border-radius: var(--radius-ctl);
+}
+.ak-btn-primary {
+  background: var(--brand);
+  border-color: var(--brand-ink);
+}
+.ak-search-trigger {
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+@media (max-width: 1023px) {
+  .ms-suite-brand { min-width: auto; }
+  .ms-suite-env,
+  .ms-suite-search { display: none; }
+  .ms-nav {
+    transform: translateX(-100%);
+    transition: transform 0.18s ease-out;
+  }
+  .ms-nav.is-open { transform: translateX(0); }
+  .ms-nav-scrim {
+    display: block;
+    position: fixed;
+    inset: 48px 0 0 0;
+    z-index: 55;
+    border: 0;
+    background: rgba(0,0,0,0.38);
+  }
+  .ms-workspace { padding-left: 0; }
+  .ms-pagebar { padding: 10px 16px; }
+  .ms-pagebar-actions { display: none; }
+  .ms-content { padding: 18px 16px 32px; }
+}
+
+/* Hero preview — mirrors the storefront Ken Burns zoom so staff see the real effect */
+@keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.1); } }
+.animate-kenburns { animation: kenburns 6s ease-in-out alternate infinite; }
+
+/* Compact form label used in inline edit forms */
+.ak-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+}
+
+/* ── Motion system ─────────────────────────────────
+   Entrances: ~300ms ease-out, staggered 45ms per card
+   via --stagger. Micro-interactions stay 100–150ms.
+   All motion is disabled under prefers-reduced-motion. */
+@keyframes ak-rise-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.anim-rise {
+  animation: ak-rise-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--stagger, 0) * 45ms);
+}
+
+@keyframes ak-bar-grow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+.anim-bar {
+  transform-origin: bottom;
+  animation: ak-bar-grow 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(0.15s + var(--stagger, 0) * 55ms);
+}
+
+.ak-quicklink { transition: background 0.12s; }
+.ak-quicklink:hover { background: var(--surface-3) !important; }
+.ak-quicklink svg:last-child { transition: transform 0.15s; }
+.ak-quicklink:hover svg:last-child { transform: translateX(2px); }
+
+.stat-card { transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s; }
+.stat-card:hover { transform: translateY(-1px); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* A page the signed-in role can only view (Shell sets data-readonly). Links to
+   create and edit screens are hidden here in one place rather than in each of
+   the dozen list pages that draw them — the screens themselves refuse anyway.
+   Anything else that changes data carries data-manage. */
+[data-readonly] a[href$="/add"],
+[data-readonly] a[href*="/edit/"],
+[data-readonly] a[href$="/edit"],
+[data-readonly] [data-manage] {
+  display: none !important;
+}
