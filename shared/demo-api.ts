@@ -25,7 +25,7 @@ type Page = { count: number; next: string | null; previous: string | null; resul
 /* When the fixtures were recorded. Every timestamp in them moves forward by
    the whole days since, so "placed yesterday" stays yesterday and the demo
    never looks abandoned. Update it when the fixtures are re-recorded. */
-const RECORDED_AT = Date.parse("2026-10-26T08:48:00Z");
+const RECORDED_AT = Date.parse("2026-10-26T09:10:00Z");
 const DAY_MS = 86_400_000;
 const ISO_DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
 

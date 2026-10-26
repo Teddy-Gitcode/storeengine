@@ -95,6 +95,9 @@ for p in load("products.json"):
                           is_primary=img["is_primary"])
         pi.image.name = media_name(img["url"])
         pi.save()
+    for v in p.get("videos") or []:
+        ProductVideo.objects.create(product=prod, title=v["title"], video_url=v["video_url"],
+                                    thumbnail_url=v["thumbnail_url"], sort_order=v["sort_order"])
     stock = p.get("stock") or {}
     StockItem.objects.update_or_create(product=prod, defaults={
         "quantity_on_hand": stock.get("quantity_on_hand", 20),
