@@ -19,6 +19,9 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
   const { id } = await params;
   const order = await getOrder(id);
   if (!order) notFound();
+  // Lines are stored in the base currency and the totals in the one charged;
+  // the invoice is in the latter throughout, so the lines add up to the total.
+  const rate = Number(order.fx_rate) || 1;
 
   let settings: StoreSettings | null = null;
   try {
@@ -114,8 +117,8 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
                 <td style={{ padding: '10px 4px', fontWeight: 600 }}>{item.name}</td>
                 <td style={{ padding: '10px 4px', fontFamily: 'monospace', fontSize: 11, color: '#6B6B66' }}>{item.sku || '—'}</td>
                 <td style={{ padding: '10px 4px', textAlign: 'right' }}>{item.quantity}</td>
-                <td style={{ padding: '10px 4px', textAlign: 'right' }}>{money(item.unit_price)}</td>
-                <td style={{ padding: '10px 4px', textAlign: 'right', fontWeight: 600 }}>{money(item.line_total)}</td>
+                <td style={{ padding: '10px 4px', textAlign: 'right' }}>{money(Number(item.unit_price) * rate)}</td>
+                <td style={{ padding: '10px 4px', textAlign: 'right', fontWeight: 600 }}>{money(Number(item.line_total) * rate)}</td>
               </tr>
             ))}
           </tbody>

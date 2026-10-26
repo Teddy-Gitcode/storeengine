@@ -189,7 +189,7 @@ export default async function RefundDetailPage({ params }: { params: Promise<{ i
                       {item.quantity} pcs
                     </td>
                     <td className={`${TABLE_TD} whitespace-nowrap font-dm-sans text-sm font-semibold text-primary`}>
-                      {money.format(Number(item.line_total))}
+                      {money.format(Number(item.line_total) * (Number(order.fx_rate) || 1))}
                     </td>
                     <td className={`${TABLE_TD} whitespace-nowrap text-sm text-light-secondary-text`}>
                       {order.payment_status}

@@ -4,6 +4,7 @@ import OrderSelect from '@/components/sellzy/order-select';
 import OrderPagination from '@/components/sellzy/order-pagination';
 import OrderExportButton from '@/components/sellzy/order-export-button';
 import { getOrders, getStoreSettings } from '@/lib/admin-api';
+import { moneyFormatter } from '@/lib/money';
 import { Search, Eye, CreditCard } from 'lucide-react';
 import { paymentLogoFor } from '@/lib/payment-logos';
 
@@ -41,11 +42,7 @@ export default async function TransactionsPage({
   ]);
   const orders = tablePage.results;
 
-  const money = new Intl.NumberFormat(settings?.locale || 'en-US', {
-    style: 'currency',
-    currency: settings?.currency_code || 'USD',
-    maximumFractionDigits: 0,
-  });
+  const money = moneyFormatter(settings);
   const date = (v: string | null) =>
     v ? new Date(v).toLocaleDateString(settings?.locale || 'en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
 
@@ -104,7 +101,7 @@ export default async function TransactionsPage({
             {orders.map((o) => (
               <tr key={o.id} className="transition-colors border-b last:border-0 border-gray-500/20 hover:bg-gray-50/50">
                 <td className="px-3 py-3.5 pl-6 align-middle font-normal text-sm text-light-secondary-text whitespace-nowrap font-public-sans">{o.number}</td>
-                <td className="px-3 py-3.5 align-middle text-sm font-medium text-light-primary-text whitespace-nowrap font-dm-sans">{money.format(Number(o.grand_total))}</td>
+                <td className="px-3 py-3.5 align-middle text-sm font-medium text-light-primary-text whitespace-nowrap font-dm-sans">{money(o.grand_total, o.currency)}</td>
                 <td className="px-3 py-3.5 align-middle whitespace-nowrap min-w-40">
                   <div className="flex items-center gap-2">
                     {/* Brand logo where we recognise the method, icon otherwise. */}

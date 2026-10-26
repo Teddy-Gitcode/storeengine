@@ -100,7 +100,12 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const [order, settings] = await Promise.all([getOrder(id), getStoreSettings().catch(() => null)]);
   if (!order) notFound();
 
-  const money = moneyFormatter(settings, 2);
+  // Everything on this page is the order's, so it reads in what the shopper
+  // was charged in. Lines are stored in the base currency; the rate the order
+  // recorded brings them into the same one as the totals beneath them.
+  const format = moneyFormatter(settings, 2);
+  const money = (value: string | number) => format(value, order.currency);
+  const rate = Number(order.fx_rate) || 1;
   const staffNotes: StaffNote[] = Array.isArray(order.metadata?.staff_notes)
     ? (order.metadata.staff_notes as StaffNote[])
     : [];
@@ -181,7 +186,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                       <td className="whitespace-nowrap px-3 py-2.5 text-[13px]" style={{ color: 'var(--text-3)' }}>{item.sku || '—'}</td>
                       <td className="whitespace-nowrap px-3 py-2.5 text-[13px] tabular-nums" style={{ color: 'var(--text-2)' }}>{item.quantity}</td>
                       <td className="whitespace-nowrap px-3 py-2.5 pr-5 font-dm-sans text-[13px] font-medium" style={{ color: 'var(--text-1)' }}>
-                        {money(item.line_total)}
+                        {money(Number(item.line_total) * rate)}
                       </td>
                     </tr>
                   ))}

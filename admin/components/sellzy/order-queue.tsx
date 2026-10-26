@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { AlertTriangle, Check, PackageCheck, Search } from 'lucide-react';
 import type { AdminOrder } from '@/lib/admin-types';
+import { moneyFormatter } from '@/lib/money';
 import {
   StatusPill, TABLE_HEAD_ROW, TABLE_ROW, TABLE_TD, TABLE_TH,
 } from '@/components/sellzy/product-ui';
@@ -59,7 +60,7 @@ export default function OrderQueue({
   const [pending, startTransition] = useTransition();
 
   const money = useMemo(
-    () => new Intl.NumberFormat(locale, { style: 'currency', currency: currencyCode, maximumFractionDigits: 0 }),
+    () => moneyFormatter({ currency_code: currencyCode, locale }),
     [locale, currencyCode],
   );
 
@@ -255,7 +256,7 @@ export default function OrderQueue({
                       {items}
                     </td>
                     <td className={`${TABLE_TD} whitespace-nowrap font-dm-sans text-sm font-semibold text-primary`}>
-                      {money.format(Number(o.grand_total))}
+                      {money(o.grand_total, o.currency)}
                     </td>
                     <td className={`${TABLE_TD} whitespace-nowrap`}>
                       {/* COD sits on the warehouse queue unpaid by design, so

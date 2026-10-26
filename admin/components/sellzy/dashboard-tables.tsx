@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { ActionResult } from '@/app/dashboard-actions';
+import { moneyFormatter } from '@/lib/money';
 
 // ── Shared pager — the template's `‹ 1 2 3 ›` bar (rounded pills, active page
 // bg-primary-lighter). Client-side: paginates the rows already on the page.
@@ -52,6 +53,8 @@ export type RecentOrder = {
   placed_at: string;
   items: number;
   grand_total: number | string;
+  /** What this order was charged in; the store's currency when absent. */
+  currency?: string;
   status: string;
 };
 
@@ -84,7 +87,7 @@ export function RecentOrdersTable({
   const [confirming, setConfirming] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const money = new Intl.NumberFormat(locale, { style: 'currency', currency: currencyCode, maximumFractionDigits: 0 });
+  const money = moneyFormatter({ currency_code: currencyCode, locale });
   const dateFmt = (v: string) => new Date(v).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
   const totalPages = Math.max(1, Math.ceil(orders.length / PER_PAGE));
   const cur = Math.min(page, totalPages);
@@ -129,7 +132,7 @@ export function RecentOrdersTable({
                 <td className={`${td} text-sm font-public-sans text-light-secondary-text`}>{o.email}</td>
                 <td className={`${td} text-sm font-dm-sans text-light-secondary-text`}>{dateFmt(o.placed_at)}</td>
                 <td className={`${td} text-sm font-dm-sans text-light-primary-text`}>{o.items}</td>
-                <td className={`${td} text-sm font-dm-sans font-semibold text-light-primary-text`}>{money.format(Number(o.grand_total))}</td>
+                <td className={`${td} text-sm font-dm-sans font-semibold text-light-primary-text`}>{money(o.grand_total, o.currency)}</td>
                 <td className={td}>
                   <span className={`px-2 py-1 h-5.5 inline-flex items-center justify-center font-public-sans rounded-full text-xs font-medium ${ORDER_STATUS_BADGE[o.status] ?? 'bg-gray-200 text-gray-700'}`}>
                     {pretty(o.status)}

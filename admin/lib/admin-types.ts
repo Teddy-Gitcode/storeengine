@@ -88,7 +88,7 @@ export type DashboardData = {
   fulfillment: { label: string; count: number; pct: number }[];
   recent_orders: {
     number: string; email: string; placed_at: string; items: number;
-    grand_total: number; status: string; payment_status: string;
+    grand_total: number; currency: string; status: string; payment_status: string;
   }[];
 };
 
@@ -104,6 +104,8 @@ export type AdminOrder = {
   on_hold: boolean;
   cancelled_at: string | null;
   currency: string;
+  /** Base prices × this = the amounts below. Lines stay in the base currency. */
+  fx_rate: string;
   subtotal: string;
   shipping_total: string;
   discount_total: string;

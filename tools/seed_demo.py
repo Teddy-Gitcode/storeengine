@@ -191,6 +191,24 @@ SHAPES = [
 PROVIDERS_KE = [("mobile_money", 65), ("paystack", 35)]
 PROVIDERS_INTL = [("paypal", 60), ("paystack", 40)]
 FX = Decimal(str(snap.get("secondary_currency_rate") or "0.0077035668"))
+# Kenya pays shillings and everyone else the store's second currency, dollars,
+# which is what checkout does. UK orders are written in pounds on top of that,
+# as if they had come in through a GBP storefront: the admin shows every order
+# in its own currency, and this is the demo that proves it.
+GBP = (FX * Decimal("0.79")).quantize(Decimal("0.0000000001"))
+
+
+def charge_for(country):
+    if country == "KE":
+        return "KES", Decimal("1")
+    if country == "GB":
+        return "GBP", GBP
+    return "USD", FX
+
+
+def money(base, rate):
+    return (base * rate).quantize(Decimal("0.01"))
+
 RIDERS = [("Peter Kamau", "KMFG 214A"), ("Samuel Otieno", "KMDX 902L"), ("Daniel Kiptoo", "KMEB 388C")]
 active = [p for p in products if p.status == "active"]
 orders = []
@@ -209,10 +227,7 @@ for i in range(160):
         method = "prepaid"
         if pay == P.DUE_ON_DELIVERY:
             pay = P.PAID
-    # Everyone pays in KES: the admin's order list formats every amount in the
-    # store currency, so USD orders would be mislabelled there.
-    rate = Decimal("1")
-    currency = "KES"
+    currency, rate = charge_for(addr.country_code)
     order = Order.objects.create(
         number=f"SO-{placed:%y%m}{10000 + i}", customer=prof, email=prof.user.email, phone=prof.phone,
         payment_status=pay, fulfillment_status=ful, payment_method=method, currency=currency, fx_rate=rate,
@@ -223,15 +238,17 @@ for i in range(160):
     subtotal = Decimal("0")
     for prod in random.sample(active, k=random.choices([1, 2, 3, 4], weights=[48, 32, 14, 6])[0]):
         qty = 1 if prod.price > 20000 else random.choices([1, 2, 3], weights=[70, 22, 8])[0]
-        unit = (prod.price * rate).quantize(Decimal("0.01"))
+        # Lines stay in the base currency, as checkout stores them.
+        unit = prod.price
         line = unit * qty
         subtotal += line
         OrderItem.objects.create(order=order, product_id=prod.id, sku=prod.sku, name=prod.name,
                                  quantity=qty, unit_price=unit, line_total=line)
     shipping = Decimal("300.00") if home else Decimal("3200.00")
     discount = (subtotal * Decimal("0.10")).quantize(Decimal("0.01")) if random.random() < 0.15 else Decimal("0")
-    order.subtotal, order.shipping_total, order.discount_total = subtotal, shipping, discount
-    order.grand_total = subtotal + shipping - discount
+    order.subtotal, order.shipping_total, order.discount_total = (
+        money(subtotal, rate), money(shipping, rate), money(discount, rate))
+    order.grand_total = money(subtotal + shipping - discount, rate)
     if ful in (F.PACKED, F.SHIPPED, F.DELIVERED, F.RETURNED):
         order.packed_at = min(placed + timedelta(hours=random.randint(3, 20)), now - timedelta(hours=2))
         order.package_weight_grams = random.randint(400, 9000)
@@ -287,7 +304,7 @@ for i in range(160):
             status={F.SHIPPED: "in_transit", F.DELIVERED: "delivered", F.RETURNED: "returned"}[ful],
             tracking_number=f"SE{random.randint(10**7, 10**8 - 1)}" if not nairobi else "",
             service_name="Same-day rider" if nairobi else dhl_service,
-            cost=shipping, currency=currency,
+            cost=order.shipping_total, currency=currency,
             estimated_delivery_at=order.dispatched_at + timedelta(days=1 if nairobi else 3 if home else 6),
             rider_name=rider if nairobi else "", vehicle="Motorbike" if nairobi else "",
             vehicle_plate=plate if nairobi else "",
@@ -302,10 +319,11 @@ REASONS = ["Arrived with a cracked screen.", "Wrong size, would like to return i
 for o, st in zip(random.sample(delivered, 7), ["requested"] * 3 + ["approved"] * 3 + ["rejected"]):
     r = Refund.objects.create(
         order=o, kind=random.choice(["refund", "return"]), status=st,
-        amount=o.items.first().line_total, partial=o.items.count() > 1, reason=random.choice(REASONS),
+        amount=money(o.items.first().line_total, o.fx_rate), partial=o.items.count() > 1, reason=random.choice(REASONS),
         method="M-Pesa reversal" if o.shipping_address.country_code == "KE" else "Card refund", requested_by=o.email,
         resolved_by="demo.admin" if st != "requested" else "",
-        resolution_note={"approved": "Refunded to M-Pesa.", "rejected": "Outside the 14-day window."}.get(st, ""),
+        resolution_note={"approved": "Refunded to M-Pesa." if o.currency == "KES" else "Refunded to the card.",
+                         "rejected": "Outside the 14-day window."}.get(st, ""),
         resolved_at=now - timedelta(days=random.randint(1, 10)) if st != "requested" else None,
     )
 
@@ -364,12 +382,12 @@ for name, code, ptype, value, st in [
 # Abandoned carts.
 for i in range(9):
     prof, cart_addr, _ = random.choice(customers)
-    cart_rate = Decimal("1")
+    cart_currency, cart_rate = charge_for(cart_addr.country_code)
     picked = random.sample(active, k=random.randint(1, 3))
     AbandonedCart.objects.create(
         reference=f"CART-{7300 + i}", customer=prof, email=prof.user.email, phone=prof.phone,
         status=random.choice(["abandoned", "abandoned", "recovered"]),
-        currency="KES" if cart_rate == 1 else "USD",
+        currency=cart_currency,
         subtotal=sum(((p.price * cart_rate).quantize(Decimal("0.01")) for p in picked), Decimal("0")), item_count=len(picked),
         last_activity_at=at(random.uniform(0.2, 12)),
         metadata={"items": [{"product_id": p.id, "name": p.name, "quantity": 1, "price": str(p.price)} for p in picked]},

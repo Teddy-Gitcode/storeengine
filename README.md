@@ -16,8 +16,10 @@ recorded responses.
   TedStore catalogue (133 products), rebranded as StoreEngine.
 - **Customers, orders, payments, refunds, reviews and support tickets** are
   generated. Customers are `johndoe1` to `johndoe48` (`@example.com`) in ten
-  countries. Every order is in KES, because the admin's order list formats
-  amounts in the store currency. No real shopper data is in this repo.
+  countries. Kenyan orders are in KES, UK orders in GBP and the rest in USD;
+  dashboard totals convert them all back to KES. Real checkout offers only the
+  store currency and one other (USD), so the GBP orders are seeded directly.
+  No real shopper data is in this repo.
 - **Writes are never stored.** Saving in the admin succeeds and echoes the
   record back, but the next page load shows the original data. Any visitor
   could otherwise rewrite what the next one sees.

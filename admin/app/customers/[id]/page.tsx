@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { ArrowLeft, MapPin, Pencil, ShoppingBag, User } from 'lucide-react';
 import { deleteCustomer, getCustomer, getOrders, getStoreSettings } from '@/lib/admin-api';
+import { baseTotal, moneyFormatter } from '@/lib/money';
 import type { AdminOrder } from '@/lib/admin-types';
 import {
   IconAction, StatusPill, TABLE_HEAD_ROW, TABLE_ROW, TABLE_TD, TABLE_TH, type PillTone,
@@ -58,7 +59,9 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
   });
   const spent = orders
     .filter((o) => o.payment_status === 'paid')
-    .reduce((sum, o) => sum + Number(o.grand_total), 0);
+    // In the store's currency: orders charged in dollars are converted back.
+    .reduce((sum, o) => sum + baseTotal(o), 0);
+  const orderMoney = moneyFormatter(settings);
 
   const fullName = `${customer.user.first_name} ${customer.user.last_name}`.trim() || customer.user.username;
 
@@ -208,7 +211,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                       </td>
                       <td className={`${TABLE_TD} whitespace-nowrap text-sm tabular-nums text-light-secondary-text`}>{items}</td>
                       <td className={`${TABLE_TD} whitespace-nowrap font-dm-sans text-sm font-semibold text-primary`}>
-                        {money.format(Number(o.grand_total))}
+                        {orderMoney(o.grand_total, o.currency)}
                       </td>
                       <td className={`${TABLE_TD} whitespace-nowrap`}>
                         <StatusPill

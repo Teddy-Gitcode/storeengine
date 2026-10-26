@@ -25,7 +25,7 @@ type Page = { count: number; next: string | null; previous: string | null; resul
 /* When the fixtures were recorded. Every timestamp in them moves forward by
    the whole days since, so "placed yesterday" stays yesterday and the demo
    never looks abandoned. Update it when the fixtures are re-recorded. */
-const RECORDED_AT = Date.parse("2026-10-25T19:31:00Z");
+const RECORDED_AT = Date.parse("2026-10-26T08:48:00Z");
 const DAY_MS = 86_400_000;
 const ISO_DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
 
@@ -296,6 +296,13 @@ function checkout(data: Row) {
   const subtotal = items.reduce((sum, i) => sum + Number(i.line_total), 0);
   const settings = (fixture("/store/settings/")?.body ?? {}) as Row;
   const code = String(data.coupon_code ?? "").toUpperCase();
+  // Prices are in the base currency. A shopper paying in the second one is
+  // charged at its rate, as the real checkout does; anything else is the base.
+  const base = String(settings.currency_code ?? "KES");
+  const asked = String(data.currency ?? "").toUpperCase();
+  const second = String(settings.secondary_currency_code ?? "").toUpperCase();
+  const rate = asked && asked === second ? Number(settings.secondary_currency_rate) || 1 : 1;
+  const charge = (amount: number) => Math.round(amount * rate * 100) / 100;
   const d = new Date();
   const order: DemoOrder = {
     number: `SO-${String(d.getFullYear()).slice(2)}${String(d.getMonth() + 1).padStart(2, "0")}${Math.floor(10000 + Math.random() * 89999)}`,
@@ -303,10 +310,10 @@ function checkout(data: Row) {
     email: String(contact.email ?? me().email ?? ""),
     phone: String(contact.phone ?? ""),
     created: Date.now(),
-    currency: String(data.currency ?? settings.currency_code ?? "KES"),
-    subtotal,
-    shipping: code === "FREESHIP" ? 0 : Number(settings.flat_shipping_fee ?? 300),
-    discount: code === "WELCOME10" ? Math.round(subtotal * 0.1) : 0,
+    currency: rate === 1 ? base : second,
+    subtotal: charge(subtotal),
+    shipping: code === "FREESHIP" ? 0 : charge(Number(settings.flat_shipping_fee ?? 300)),
+    discount: code === "WELCOME10" ? charge(Math.round(subtotal * 0.1)) : 0,
     items,
   };
   const h = hold(order);

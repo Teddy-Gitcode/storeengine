@@ -1,5 +1,6 @@
 import StatCard from '@/components/StatCard';
 import { getOrders, getPayments, getProducts, getStoreSettings, getDashboard } from '@/lib/admin-api';
+import { baseTotal, moneyFormatter } from '@/lib/money';
 import type { AdminOrder } from '@/lib/admin-types';
 import { DollarSign, Eye, ShoppingBag, TrendingUp, Award } from 'lucide-react';
 import AnalyticsRevenueChart from '@/components/sellzy/analytics-revenue-chart';
@@ -53,6 +54,9 @@ export default async function AnalyticsPage() {
     currency: settings?.currency_code || 'USD',
     maximumFractionDigits: 0,
   });
+  // One order's own figures, in what it was charged in. Sums above use
+  // `baseTotal` so dollar and shilling orders add up in the store's currency.
+  const orderMoney = moneyFormatter(settings);
 
   const now = new Date();
   const monthLabel = now.toLocaleDateString(settings?.locale || 'en-US', { month: 'long', year: 'numeric' });
@@ -60,7 +64,7 @@ export default async function AnalyticsPage() {
 
   const paidOrders = orders.filter((o) => PAID_STATUSES.has(o.status));
   const paidMtd = paidOrders.filter((o) => isMtd(orderDate(o)));
-  const revenueMtd = paidMtd.reduce((s, o) => s + Number(o.grand_total), 0);
+  const revenueMtd = paidMtd.reduce((s, o) => s + baseTotal(o), 0);
   const avgBasket = paidMtd.length ? revenueMtd / paidMtd.length : 0;
 
   // Top category by paid order line revenue (item name -> product category)
@@ -91,7 +95,7 @@ export default async function AnalyticsPage() {
   const dayKey = (d: Date) => d.toISOString().slice(0, 10);
   const days = Array.from({ length: 7 }, (_, i) => new Date(Date.now() - (6 - i) * DAY));
   const revenueByDay = days.map((d) =>
-    paidOrders.filter((o) => dayKey(orderDate(o)) === dayKey(d)).reduce((s, o) => s + Number(o.grand_total), 0),
+    paidOrders.filter((o) => dayKey(orderDate(o)) === dayKey(d)).reduce((s, o) => s + baseTotal(o), 0),
   );
   const rangeLabel = `${days[0].toLocaleDateString(settings?.locale || 'en-US', { weekday: 'short', day: 'numeric', month: 'short' })} – ${days[6].toLocaleDateString(settings?.locale || 'en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}`;
 
@@ -308,10 +312,10 @@ export default async function AnalyticsPage() {
                       {o.items.reduce((sum, i) => sum + i.quantity, 0)}
                     </td>
                     <td className={`${TABLE_TD} text-sm font-semibold text-primary font-dm-sans whitespace-nowrap`}>
-                      {money.format(Number(o.grand_total))}
+                      {orderMoney(o.grand_total, o.currency)}
                     </td>
                     <td className={`${TABLE_TD} text-sm text-light-secondary-text font-dm-sans whitespace-nowrap`}>
-                      {money.format(Number(o.tax_total))}
+                      {orderMoney(o.tax_total, o.currency)}
                     </td>
                     <td className={`${TABLE_TD} whitespace-nowrap`}>
                       <StatusPill

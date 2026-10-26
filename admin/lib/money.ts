@@ -12,15 +12,37 @@ import type { StoreSettings } from '@/lib/admin-types';
 
 type Formattable = Pick<StoreSettings, 'currency_code' | 'locale'> | null | undefined;
 
+/** Pass an order's own `currency` for anything read off that order: its
+ *  totals are in what the shopper was charged in, which is not always the
+ *  store's currency. A $100 order printed with the store's would read
+ *  "KSh 100". Leave it out for figures already in the store's currency. */
 export function moneyFormatter(settings: Formattable, fractionDigits = 0) {
   const locale = settings?.locale || 'en-US';
-  const currency = settings?.currency_code || 'USD';
-  const format = new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: fractionDigits,
-  });
-  return (value: string | number | null | undefined) => format.format(Number(value ?? 0));
+  const base = settings?.currency_code || 'USD';
+  const formats = new Map<string, Intl.NumberFormat>();
+  const formatFor = (currency: string) => {
+    let format = formats.get(currency);
+    if (!format) {
+      // Whole shillings suit the store's own lists, but rounding a foreign
+      // order the same way prints $7.70 as $8, so those keep their cents.
+      format = new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency,
+        ...(currency === base ? { maximumFractionDigits: fractionDigits } : {}),
+      });
+      formats.set(currency, format);
+    }
+    return format;
+  };
+  return (value: string | number | null | undefined, currency?: string | null) =>
+    formatFor(currency || base).format(Number(value ?? 0));
+}
+
+/** An order total in the store's currency, for adding orders together.
+ *  `fx_rate` is what base prices were multiplied by at checkout. */
+export function baseTotal(order: { grand_total: string | number; fx_rate?: string | number | null }) {
+  const rate = Number(order.fx_rate) || 1;
+  return Number(order.grand_total) / rate;
 }
 
 export function numberFormatter(settings: Formattable) {

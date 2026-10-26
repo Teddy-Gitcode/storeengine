@@ -210,7 +210,7 @@ export default async function OrdersPage({
                         this column counted rows and called them "pcs", so the
                         same order read 3 here and 7 there. */}
                     <td className="whitespace-nowrap px-3 py-3 font-dm-sans text-[13px] font-semibold" style={{ color: 'var(--text-1)' }}>
-                      {money(order.grand_total)}
+                      {money(order.grand_total, order.currency)}
                       <span className="block font-public-sans text-[11px] font-normal tabular-nums" style={{ color: 'var(--text-3)' }}>
                         {units} unit{units === 1 ? '' : 's'}
                       </span>
